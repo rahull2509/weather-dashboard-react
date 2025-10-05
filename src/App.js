@@ -3,7 +3,7 @@ import SearchBar from './components/SearchBar';
 import CurrentWeather from './components/CurrentWeather';
 import Forecast from './components/Forecast';
 import { getCurrentWeather, getForecast, getWeatherByCoords } from './services/weatherApi';
-import { getWeatherBackground } from './utils/weatherUtils';
+import { getWeatherBackground, isDayTime } from './utils/weatherUtils';
 import './App.css';
 
 function App() {
@@ -66,8 +66,13 @@ function App() {
     }
   };
 
+  const currentTime = Math.floor(Date.now() / 1000);
+  const isDay = currentWeather ? 
+    isDayTime(currentWeather.sys.sunrise, currentWeather.sys.sunset, currentTime) : 
+    true;
+
   const backgroundStyle = currentWeather 
-    ? { background: getWeatherBackground(currentWeather.weather[0].main) }
+    ? { background: getWeatherBackground(currentWeather.weather[0].main, isDay) }
     : {};
 
   return (
@@ -75,7 +80,6 @@ function App() {
       <div className="container">
         <header className="app-header">
           <h1>🌤️ Weather Dashboard</h1>
-          <p>Get real-time weather updates</p>
         </header>
 
         <SearchBar onSearch={fetchWeather} onGetLocation={handleGetLocation} />
@@ -96,7 +100,7 @@ function App() {
         {!loading && !error && currentWeather && (
           <>
             <CurrentWeather weather={currentWeather} />
-            <Forecast forecast={forecast} />
+            <Forecast forecast={forecast} currentWeather={currentWeather} />
           </>
         )}
       </div>

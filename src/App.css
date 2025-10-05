@@ -402,3 +402,80 @@ body {
     grid-template-columns: repeat(2, 1fr);
   }
 }
+
+
+.day-night-indicator {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-top: 10px;
+  opacity: 0.9;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 0.9; }
+  50% { opacity: 1; }
+}
+
+.weather-icon.moon {
+  color: #F4F4F4;
+  filter: drop-shadow(0 0 20px rgba(244, 244, 244, 0.5));
+  animation: glow 3s ease-in-out infinite;
+}
+
+@keyframes glow {
+  0%, 100% { filter: drop-shadow(0 0 20px rgba(244, 244, 244, 0.5)); }
+  50% { filter: drop-shadow(0 0 30px rgba(244, 244, 244, 0.8)); }
+}
+
+.weather-icon.thunder {
+  color: #FFD700;
+  animation: flash 2s ease-in-out infinite;
+}
+
+@keyframes flash {
+  0%, 50%, 100% { opacity: 1; }
+  25%, 75% { opacity: 0.5; }
+}
+
+.weather-icon.drizzle {
+  color: #89ABE3;
+  animation: drizzleMove 2.5s ease-in-out infinite;
+}
+
+@keyframes drizzleMove {
+  0%, 100% { transform: translateY(0) translateX(0); }
+  25% { transform: translateY(-3px) translateX(-2px); }
+  50% { transform: translateY(-5px) translateX(2px); }
+  75% { transform: translateY(-3px) translateX(-2px); }
+}
+
+.weather-icon.snow {
+  color: #E6DADA;
+  animation: snowFall 4s ease-in-out infinite;
+}
+
+@keyframes snowFall {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-8px) rotate(180deg); }
+}
+
+.weather-icon.fog {
+  color: #B0B0B0;
+  animation: fogMove 3s ease-in-out infinite;
+}
+
+@keyframes fogMove {
+  0%, 100% { opacity: 0.8; transform: translateX(0); }
+  50% { opacity: 1; transform: translateX(5px); }
+}
+
+.day-night-badge {
+  font-size: 1.2rem;
+  margin-top: 10px;
+  opacity: 0.8;
+}
+
+.App {
+  transition: background 1s ease;
+}
