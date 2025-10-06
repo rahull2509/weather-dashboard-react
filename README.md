@@ -186,7 +186,7 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ## 📧 Contact
 
-Your Name - [Rahul Gangwar](https://www.linkedin.com/in/rahullgangwar/)
+Name - [Rahul Gangwar](https://www.linkedin.com/in/rahullgangwar/)
 
 Project Link: [https://github.com/rahull2509 /weather-dashboard](https://github.com/rahull2509/weather-dashboard-react)
 
