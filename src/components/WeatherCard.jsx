@@ -1,14 +1,31 @@
 import WeatherIcon from './WeatherIcon';
-import { formatDate, formatTime } from '../utils/weatherUtils';
 
-function WeatherCard({ data, sunrise, sunset }) {
+function WeatherCard({ data }) {
+  const forecastDate = new Date(data.dt * 1000);
+  const forecastHour = forecastDate.getHours();
+  
+  const isDay = forecastHour >= 6 && forecastHour < 18;
+  
+  const getFormattedDate = () => {
+    return forecastDate.toLocaleDateString('en-US', {
+      weekday: 'short',
+      month: 'short',
+      day: 'numeric'
+    });
+  };
 
-  const isDay = data.dt >= sunrise && data.dt < sunset;
+  const getFormattedTime = () => {
+    return forecastDate.toLocaleTimeString('en-US', {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true
+    });
+  };
   
   return (
     <div className="weather-card">
-      <p className="forecast-date">{formatDate(data.dt)}</p>
-      <p className="forecast-time">{formatTime(data.dt)}</p>
+      <p className="forecast-date">{getFormattedDate()}</p>
+      <p className="forecast-time">{getFormattedTime()}</p>
       
       <WeatherIcon 
         condition={data.weather[0].main} 
@@ -25,7 +42,7 @@ function WeatherCard({ data, sunrise, sunset }) {
       
       <div className="forecast-detail">
         <span>💧 {data.main.humidity}%</span>
-        <span>💨 {data.wind.speed} m/s</span>
+        <span>💨 {data.wind.speed.toFixed(2)} m/s</span>
       </div>
       
       <p className="day-night-badge">

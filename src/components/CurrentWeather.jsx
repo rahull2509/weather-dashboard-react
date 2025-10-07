@@ -1,4 +1,4 @@
-import { Droplets, Wind, Eye, Gauge } from 'lucide-react';
+import { Droplets, Wind, Eye, Gauge, Calendar } from 'lucide-react';
 import WeatherIcon from './WeatherIcon';
 import { formatTime } from '../utils/weatherUtils';
 
@@ -8,12 +8,29 @@ function CurrentWeather({ weather }) {
   const currentTime = Math.floor(Date.now() / 1000);
   const isDay = currentTime >= weather.sys.sunrise && currentTime < weather.sys.sunset;
 
+  const getCurrentDate = () => {
+    const now = new Date();
+    const options = { 
+      weekday: 'long', 
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric' 
+    };
+    return now.toLocaleDateString('en-US', options);
+  };
+
   return (
     <div className="current-weather">
       <div className="current-main">
-        <div className="location">
-          <h1>{weather.name}</h1>
-          <p>{weather.sys.country}</p>
+        <div className="location-header">
+          <div className="location">
+            <h1>{weather.name}</h1>
+            <p>{weather.sys.country}</p>
+          </div>
+          <div className="current-date">
+            <Calendar size={20} />
+            <p>{getCurrentDate()}</p>
+          </div>
         </div>
         
         <div className="temp-display">

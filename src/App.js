@@ -173,7 +173,7 @@ function App() {
 
             <CurrentWeather weather={currentWeather} />
             <HourlyForecast forecast={forecast} />
-            <Forecast forecast={forecast} currentWeather={currentWeather} />
+            <Forecast forecast={forecast} />
           </>
         )}
       </div>
