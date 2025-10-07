@@ -72,23 +72,28 @@ npm start
 ```
 weather-dashboard/
 ├── public/
+│   ├── index.html
+│   └── favicon.ico
 ├── src/
 │   ├── components/
 │   │   ├── SearchBar.jsx          # Search and location input
 │   │   ├── CurrentWeather.jsx     # Main weather display
 │   │   ├── WeatherIcon.jsx        # Dynamic weather icons
 │   │   ├── WeatherCard.jsx        # Forecast card component
-│   │   └── Forecast.jsx           # 5-day forecast grid
+│   │   ├── Forecast.jsx           # 5-day forecast grid
+│   │   ├── HourlyForecast.jsx     # Hourly charts & graphs
+│   │   └── FavoriteCities.jsx     # Favorite cities management
 │   ├── services/
-│   │   └── weatherApi.js          # API integration
+│   │   └── weatherApi.js          # API integration (weather & forecast)
 │   ├── utils/
-│   │   └── weatherUtils.js        # Helper functions
+│   │   └── weatherUtils.js        # Helper functions & utilities
 │   ├── App.js                     # Main application
 │   ├── App.css                    # Styles and animations
 │   └── index.js                   # Entry point
-├── .env                           # Environment variables
-├── package.json
-└── README.md
+├── .env                           # Environment variables (API key)
+├── .gitignore                     # Git ignore file
+├── package.json                   # Dependencies
+└── README.md                      # Project documentation
 ```
 
 ## 🎨 Key Components
