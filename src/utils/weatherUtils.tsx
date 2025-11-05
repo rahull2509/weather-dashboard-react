@@ -1,11 +1,11 @@
-export const formatTime = (timestamp) => {
+export const formatTime = (timestamp: number): string => {
   return new Date(timestamp * 1000).toLocaleTimeString('en-US', {
     hour: '2-digit',
     minute: '2-digit'
   });
 };
 
-export const formatDate = (timestamp) => {
+export const formatDate = (timestamp: number): string => {
   return new Date(timestamp * 1000).toLocaleDateString('en-US', {
     weekday: 'short',
     month: 'short',
@@ -13,14 +13,14 @@ export const formatDate = (timestamp) => {
   });
 };
 
-export const formatHour = (timestamp) => {
+export const formatHour = (timestamp: number): string => {
   return new Date(timestamp * 1000).toLocaleTimeString('en-US', {
     hour: '2-digit',
     hour12: true
   });
 };
 
-export const getWeatherBackground = (condition, isDay) => {
+export const getWeatherBackground = (condition: string, isDay: boolean): string => {
   if (condition === 'Rain' || condition === 'Drizzle') {
     return 'linear-gradient(135deg, #4B79A1 0%, #283E51 100%)';
   }
@@ -52,13 +52,13 @@ export const getWeatherBackground = (condition, isDay) => {
   return 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
 };
 
-export const isDayTime = (sunrise, sunset, currentTime) => {
+export const isDayTime = (sunrise: number, sunset: number, currentTime: number): boolean => {
   return currentTime >= sunrise && currentTime < sunset;
 };
 
 // NEW: AQI utilities
-export const getAQILevel = (aqi) => {
-  const levels = {
+export const getAQILevel = (aqi: number): { label: string; color: string; emoji: string } => {
+  const levels: { [key: number]: { label: string; color: string; emoji: string } } = {
     1: { label: 'Good', color: '#00E400', emoji: '😊' },
     2: { label: 'Fair', color: '#FFFF00', emoji: '🙂' },
     3: { label: 'Moderate', color: '#FF7E00', emoji: '😐' },
@@ -68,8 +68,8 @@ export const getAQILevel = (aqi) => {
   return levels[aqi] || levels[1];
 };
 
-export const getAQIDescription = (aqi) => {
-  const descriptions = {
+export const getAQIDescription = (aqi: number): string => {
+  const descriptions: { [key: number]: string } = {
     1: 'Air quality is good. Ideal for outdoor activities.',
     2: 'Air quality is acceptable.',
     3: 'Sensitive people should reduce outdoor activities.',

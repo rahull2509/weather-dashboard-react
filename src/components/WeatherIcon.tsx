@@ -6,12 +6,16 @@ import {
   Moon,
   CloudDrizzle,
   CloudLightning,
-  CloudFog,
-  // eslint-disable-next-line no-unused-vars
-  Wind
+  CloudFog
 } from 'lucide-react';
 
-function WeatherIcon({ condition, isDay, size = 64 }) {
+interface WeatherIconProps {
+  condition: string;
+  isDay: boolean;
+  size?: number;
+}
+
+function WeatherIcon({ condition, isDay, size = 64 }: WeatherIconProps) {
   if (condition === 'Rain') {
     return <CloudRain size={size} className="weather-icon rain" />;
   }
@@ -42,7 +46,6 @@ function WeatherIcon({ condition, isDay, size = 64 }) {
       <Moon size={size} className="weather-icon moon" />;
   }
   
-  // Default - Sun or Moon
   return isDay ? 
     <Sun size={size} className="weather-icon sun" /> : 
     <Moon size={size} className="weather-icon moon" />;

@@ -1,6 +1,26 @@
 import WeatherIcon from './WeatherIcon';
 
-function WeatherCard({ data }) {
+interface WeatherData {
+  dt: number;
+  weather: Array<{
+    main: string;
+    description: string;
+  }>;
+  main: {
+    temp_max: number;
+    temp_min: number;
+    humidity: number;
+  };
+  wind: {
+    speed: number;
+  };
+}
+
+interface WeatherCardProps {
+  data: WeatherData;
+}
+
+function WeatherCard({ data }: WeatherCardProps) {
   const forecastDate = new Date(data.dt * 1000);
   const forecastHour = forecastDate.getHours();
   

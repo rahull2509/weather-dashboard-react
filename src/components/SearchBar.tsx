@@ -1,10 +1,15 @@
 import { Search, MapPin } from 'lucide-react';
 import { useState } from 'react';
 
-function SearchBar({ onSearch, onGetLocation }) {
-  const [city, setCity] = useState('');
+interface SearchBarProps {
+  onSearch: (city: string) => void;
+  onGetLocation: () => void;
+}
 
-  const handleSubmit = (e) => {
+function SearchBar({ onSearch, onGetLocation }: SearchBarProps) {
+  const [city, setCity] = useState<string>('');
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (city.trim()) {
       onSearch(city);
