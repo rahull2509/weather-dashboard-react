@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react';
-import './App.css';
 import SearchBar from './components/SearchBar';
-import WeatherCard from './components/WeatherCard';
-import WeatherIcon from './components/WeatherIcon';
+import CurrentWeather from './components/CurrentWeather';
+import Forecast from './components/Forecast';
+import HourlyForecast from './components/HourlyForecast';
+import FavoriteCities from './components/FavoriteCities';
 import { getCurrentWeather, getForecast, getWeatherByCoords } from './services/weatherApi';
-import { formatTime, getWeatherBackground, isDayTime } from './utils/weatherUtils';
-import { Calendar } from 'lucide-react';
+import { getWeatherBackground, isDayTime } from './utils/weatherUtils';
+import { Star } from 'lucide-react';
+import './App.css';
 
 interface WeatherData {
   name: string;
@@ -28,7 +30,6 @@ interface WeatherData {
     speed: number;
   };
   visibility: number;
-  dt: number;
 }
 
 interface ForecastData {
@@ -39,9 +40,11 @@ interface ForecastData {
       description: string;
     }>;
     main: {
+      temp: number;
       temp_max: number;
       temp_min: number;
       humidity: number;
+      pressure: number;
     };
     wind: {
       speed: number;
@@ -50,83 +53,65 @@ interface ForecastData {
 }
 
 function App() {
-  const [weather, setWeather] = useState<WeatherData | null>(null);
+  const [currentWeather, setCurrentWeather] = useState<WeatherData | null>(null);
   const [forecast, setForecast] = useState<ForecastData | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string>('');
-  const [background, setBackground] = useState<string>('linear-gradient(135deg, #667eea 0%, #764ba2 100%)');
+  const [error, setError] = useState<string | null>(null);
+
+  const [favorites, setFavorites] = useState<string[]>([]);
+  const [defaultCity, setDefaultCity] = useState<string>('London');
 
   useEffect(() => {
-    // Load default city on initial load
-    fetchWeatherData('London');
+    const savedFavorites = JSON.parse(localStorage.getItem('favoriteCities') || '[]') as string[];
+    const savedDefault = localStorage.getItem('defaultCity') || 'London';
+
+    setFavorites(savedFavorites);
+    setDefaultCity(savedDefault);
+
+    fetchWeather(savedDefault);
   }, []);
 
-  const fetchWeatherData = async (city: string) => {
-    setLoading(true);
-    setError('');
+  const fetchWeather = async (city: string): Promise<void> => {
     try {
+      setLoading(true);
+      setError(null);
+
       const [weatherData, forecastData] = await Promise.all([
         getCurrentWeather(city),
-        getForecast(city)
+        getForecast(city),
       ]);
-      
-      setWeather(weatherData);
+
+      setCurrentWeather(weatherData);
       setForecast(forecastData);
-      
-      // Update background based on weather condition
-      const isDay = isDayTime(
-        weatherData.sys.sunrise,
-        weatherData.sys.sunset,
-        weatherData.dt
-      );
-      const newBg = getWeatherBackground(weatherData.weather[0].main, isDay);
-      setBackground(newBg);
     } catch (err) {
-      setError('City not found. Please try again.');
-      console.error(err);
+      setError('Failed to fetch weather data.');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleSearch = (city: string) => {
-    fetchWeatherData(city);
-  };
-
-  const handleGetLocation = () => {
+  const handleGetLocation = (): void => {
     if (navigator.geolocation) {
       setLoading(true);
-      setError('');
       navigator.geolocation.getCurrentPosition(
         async (position) => {
           try {
             const { latitude, longitude } = position.coords;
             const weatherData = await getWeatherByCoords(latitude, longitude);
-            
-            setWeather(weatherData);
-            
-            // Get forecast by city name
-            const cityForecast = await getForecast(weatherData.name);
-            setForecast(cityForecast);
-            
-            const isDay = isDayTime(
-              weatherData.sys.sunrise,
-              weatherData.sys.sunset,
-              weatherData.dt
-            );
-            const newBg = getWeatherBackground(weatherData.weather[0].main, isDay);
-            setBackground(newBg);
+            const forecastData = await getForecast(weatherData.name);
+
+            setCurrentWeather(weatherData);
+            setForecast(forecastData);
+            setError(null);
           } catch (err) {
-            setError('Unable to fetch weather for your location.');
-            console.error(err);
+            setError('Unable to get weather for your location.');
           } finally {
             setLoading(false);
           }
         },
-        (err) => {
-          setError('Unable to access your location. Please enable location services.');
+        () => {
+          setError('Unable to access your location.');
           setLoading(false);
-          console.error(err);
         }
       );
     } else {
@@ -134,30 +119,61 @@ function App() {
     }
   };
 
-  const getCurrentDate = () => {
-    return new Date().toLocaleDateString('en-US', {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    });
+  const handleAddFavorite = (): void => {
+    if (!currentWeather) return;
+
+    const cityName = currentWeather.name;
+
+    if (favorites.includes(cityName)) {
+      alert('City already in favorites!');
+      return;
+    }
+
+    const updatedFavorites = [...favorites, cityName];
+    setFavorites(updatedFavorites);
+    localStorage.setItem('favoriteCities', JSON.stringify(updatedFavorites));
   };
 
-  const isDay = weather ? isDayTime(
-    weather.sys.sunrise,
-    weather.sys.sunset,
-    weather.dt
-  ) : true;
+  const handleRemoveFavorite = (city: string): void => {
+    const updatedFavorites = favorites.filter((fav) => fav !== city);
+    setFavorites(updatedFavorites);
+    localStorage.setItem('favoriteCities', JSON.stringify(updatedFavorites));
+
+    if (city === defaultCity && updatedFavorites.length > 0) {
+      const newDefault = updatedFavorites[0];
+      setDefaultCity(newDefault);
+      localStorage.setItem('defaultCity', newDefault);
+      fetchWeather(newDefault);
+    } else if (updatedFavorites.length === 0) {
+      setDefaultCity('London');
+      localStorage.setItem('defaultCity', 'London');
+    }
+  };
+
+  const handleSetDefault = (city: string): void => {
+    setDefaultCity(city);
+    localStorage.setItem('defaultCity', city);
+    fetchWeather(city);
+  };
+
+  const currentTime = Math.floor(Date.now() / 1000);
+  const isDay = currentWeather
+    ? isDayTime(currentWeather.sys.sunrise, currentWeather.sys.sunset, currentTime)
+    : true;
+
+  const backgroundStyle = currentWeather
+    ? { background: getWeatherBackground(currentWeather.weather[0].main, isDay) }
+    : {};
 
   return (
-    <div className="App" style={{ background }}>
+    <div className="App" style={backgroundStyle}>
       <div className="container">
         <header className="app-header">
-          <h1>⛅ Weather Dashboard</h1>
-          <p>Your personal weather companion</p>
+          <h1>🌤️ Weather Dashboard</h1>
+          <p>Real-time weather with hourly forecast</p>
         </header>
 
-        <SearchBar onSearch={handleSearch} onGetLocation={handleGetLocation} />
+        <SearchBar onSearch={fetchWeather} onGetLocation={handleGetLocation} />
 
         {loading && (
           <div className="loading">
@@ -172,95 +188,35 @@ function App() {
           </div>
         )}
 
-        {weather && !loading && (
+        {!loading && !error && currentWeather && (
           <>
-            <div className="current-weather">
-              <div className="current-main">
-                <div className="location-header">
-                  <div className="location">
-                    <h1>{weather.name}, {weather.sys.country}</h1>
-                    <p className="weather-desc">{weather.weather[0].description}</p>
-                  </div>
-                  <div className="current-date">
-                    <Calendar size={20} />
-                    <p>{getCurrentDate()}</p>
-                  </div>
-                </div>
-
-                <div className="temp-display">
-                  <WeatherIcon 
-                    condition={weather.weather[0].main}
-                    isDay={isDay}
-                    size={80}
-                  />
-                  <div className="temp-info">
-                    <h2>{Math.round(weather.main.temp)}°C</h2>
-                    <p className="feels-like">Feels like {Math.round(weather.main.feels_like)}°C</p>
-                    <p className="day-night-indicator">
-                      {isDay ? '☀️ Daytime' : '🌙 Nighttime'}
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="weather-details">
-                <div className="detail-card">
-                  <span>💧</span>
-                  <div>
-                    <p className="detail-label">Humidity</p>
-                    <p className="detail-value">{weather.main.humidity}%</p>
-                  </div>
-                </div>
-                <div className="detail-card">
-                  <span>💨</span>
-                  <div>
-                    <p className="detail-label">Wind Speed</p>
-                    <p className="detail-value">{weather.wind.speed} m/s</p>
-                  </div>
-                </div>
-                <div className="detail-card">
-                  <span>🌡️</span>
-                  <div>
-                    <p className="detail-label">Pressure</p>
-                    <p className="detail-value">{weather.main.pressure} hPa</p>
-                  </div>
-                </div>
-                <div className="detail-card">
-                  <span>👁️</span>
-                  <div>
-                    <p className="detail-label">Visibility</p>
-                    <p className="detail-value">{(weather.visibility / 1000).toFixed(1)} km</p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="sun-times">
-                <div className="sun-time">
-                  <span>🌅</span>
-                  <p>Sunrise</p>
-                  <p><strong>{formatTime(weather.sys.sunrise)}</strong></p>
-                </div>
-                <div className="sun-time">
-                  <span>🌇</span>
-                  <p>Sunset</p>
-                  <p><strong>{formatTime(weather.sys.sunset)}</strong></p>
-                </div>
-              </div>
+            <div className="favorite-action">
+              <button
+                className="add-favorite-btn"
+                onClick={handleAddFavorite}
+                disabled={favorites.includes(currentWeather.name)}
+              >
+                <Star
+                  size={20}
+                  fill={favorites.includes(currentWeather.name) ? '#FFD700' : 'transparent'}
+                />
+                {favorites.includes(currentWeather.name)
+                  ? 'Added to Favorites'
+                  : 'Add to Favorites'}
+              </button>
             </div>
 
-            {forecast && (
-              <div className="forecast-section">
-                <h2>5-Day Forecast</h2>
-                <p className="forecast-subtitle" style={{ color: 'white' }}>
-                  Weather predictions for the next 5 days
-                </p>
-                <div className="forecast-grid">
-                  {forecast.list.slice(0, 8).map((item, index) => (
-                    <WeatherCard key={index} data={item} />
-                  ))}
-                </div>
-              </div>
-            )}
+            <FavoriteCities
+              favorites={favorites}
+              defaultCity={defaultCity}
+              onSelectCity={fetchWeather}
+              onRemoveFavorite={handleRemoveFavorite}
+              onSetDefault={handleSetDefault}
+            />
+
+            <CurrentWeather weather={currentWeather} />
+            <HourlyForecast forecast={forecast} />
+            <Forecast forecast={forecast} />
           </>
         )}
       </div>
